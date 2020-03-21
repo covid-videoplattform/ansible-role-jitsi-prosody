@@ -1,2 +1,57 @@
 ---
 # tasks file for ansible-role-jitsi-prosody
+
+- name: install base packages
+  apt:
+      name: "{{ item }}"
+      state: present
+  with_list:
+      - ufw
+      - bmon
+      - htop
+      - default-jre
+      - vim
+
+- name: configure firewall rules
+  ufw:
+      rule: "{{ item.rule }}"
+      port: "{{ item.port }}"
+      proto: "{{ item.proto }}"
+  with_items:
+      - { rule: 'allow', port: '22', proto: 'tcp' }
+      - { rule: 'allow', port: '5222', proto: 'tcp' }
+      - { rule: 'allow', port: '5280', proto: 'tcp' }
+
+- name: set logging
+  ufw:
+    logging: 'off'
+
+- name: set ufw policy
+  ufw:
+    state: enabled
+    policy: deny
+
+- name: add gpg key for jitsi repo
+  apt_key:
+      url: https://download.jitsi.org/jitsi-key.gpg.key
+      state: present
+
+- name: add jitsi-meet stable apt repo
+  apt_repository:
+      repo: deb https://download.jitsi.org unstable/
+      state: present
+
+- name: install jitsi-meet-prosody package
+  apt:
+      name: jitsi-meet-prosody
+      state: present
+
+- name: enable prosody service
+  systemd:
+      name: prosody
+      enabled: yes
+
+- name: restart prosody service
+  systemd:
+      name: prosody
+      state: restarted
