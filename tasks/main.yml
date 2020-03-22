@@ -75,5 +75,8 @@
       name: prosody
       state: restarted
 
-- name: create admin user
-  command: prosodyctl register focus auth.{{jitsi_domain}} {{jicofo_auth_password}}
+- name: create focus user
+  command: prosodyctl register focus "auth.{{jitsi_domain}}" "{{jicofo_auth_password}}"
+
+- name: create jvb user
+  command: prosodyctl register jvb "auth.{{jitsi_domain}}" "{{jvb_secret}}"
