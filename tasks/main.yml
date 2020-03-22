@@ -7,8 +7,8 @@
       - ufw
       - bmon
       - htop
-      - default-jre
       - vim
+      - prosody
 
 - name: configure firewall rules
   ufw:
@@ -19,6 +19,7 @@
       - { rule: 'allow', port: '22', proto: 'tcp' }
       - { rule: 'allow', port: '5222', proto: 'tcp' }
       - { rule: 'allow', port: '5280', proto: 'tcp' }
+      - { rule: 'allow', port: '5347', proto: 'tcp' }
 
 - name: set logging
   ufw:
@@ -28,6 +29,26 @@
   ufw:
     state: enabled
     policy: deny
+
+- name: prosody config
+  template:
+    src: prosody.cfg.lua.j2
+    dest: /etc/prosody/prosody.cfg.lua
+
+- name: prosody jitsi host config
+  template:
+    src: prosody-host.cfg.lua.j2
+    dest: /etc/prosody/conf.d/{{jitsi_domain}}.cfg.lua
+
+- name: generate certificate
+  command: prosodyctl cert generate {{jitsi_domain}}
+  args:
+    creates: /var/lib/prosody/{{ jitsi_domain }}.crt
+
+- name: generate auth certificate
+  command: prosodyctl cert generate auth.{{jitsi_domain}}
+  args:
+    creates: /var/lib/prosody/auth.{{ jitsi_domain }}.crt
 
 - name: add gpg key for jitsi repo
   apt_key:
@@ -53,3 +74,6 @@
   systemd:
       name: prosody
       state: restarted
+
+- name: create admin user
+  command: prosodyctl register focus auth.{{jitsi_domain}} {{jicofo_auth_password}}
