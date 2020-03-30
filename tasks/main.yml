@@ -34,11 +34,13 @@
   template:
     src: prosody.cfg.lua.j2
     dest: /etc/prosody/prosody.cfg.lua
+  notify: restart prosody service
 
 - name: prosody jitsi host config
   template:
     src: prosody-host.cfg.lua.j2
     dest: /etc/prosody/conf.d/{{jitsi_domain}}.cfg.lua
+  notify: restart prosody service
 
 - name: generate certificate
   command: prosodyctl cert generate {{jitsi_domain}}
@@ -71,16 +73,12 @@
   file:
     path: /etc/prosody/conf.d/ok.cfg.lua
     state: absent
+  notify: restart prosody service
 
 - name: enable prosody service
   systemd:
       name: prosody
       enabled: yes
-
-- name: restart prosody service
-  systemd:
-      name: prosody
-      state: restarted
 
 - name: create focus user
   command: prosodyctl register focus "auth.{{jitsi_domain}}" "{{jicofo_auth_password}}"

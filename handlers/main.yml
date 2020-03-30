@@ -1,2 +1,5 @@
 ---
-# handlers file for ansible-role-jitsi-prosody
+- name: restart prosody service
+  systemd:
+      name: prosody
+      state: restarted
