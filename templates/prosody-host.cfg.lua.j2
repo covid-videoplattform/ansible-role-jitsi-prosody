@@ -24,7 +24,11 @@ VirtualHost "{{ jitsi_domain }}"
 
         -- enabled = false -- Remove this line to enable this host
 
+{% if jitsi_secure_domain %}
+        authentication = "internal_plain"
+{% else %}
         authentication = "anonymous"
+{% endif %}
 
         -- Properties below are modified by jitsi-meet-tokens package config
 
@@ -104,6 +108,12 @@ Component "internal.auth.{{ jitsi_domain }}" "muc"
 
     storage = "memory"
     muc_room_cache_size = 1000
+
+{% if jitsi_secure_domain %}
+VirtualHost "guest.{{ jitsi_domain }}"
+    authentication = "anonymous"
+    c2s_require_encryption = false
+{% endif %}
 
 VirtualHost "auth.{{ jitsi_domain }}"
 
