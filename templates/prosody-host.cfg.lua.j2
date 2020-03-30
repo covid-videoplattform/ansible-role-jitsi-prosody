@@ -88,6 +88,9 @@ Component "conference.{{ jitsi_domain }}" "muc"
 
         -- "token_verification";
 
+{% if jitsi_restrict_room_exec %}
+        "muc_restrict_rooms_exec";
+{% endif %}
     }
 
     admins = { "focus@auth.{{ jitsi_domain }}" }
@@ -97,6 +100,12 @@ Component "conference.{{ jitsi_domain }}" "muc"
 {% if jitsi_restrict_room_creation %}
     restrict_room_creation = true
 {% endif %}
+
+{% if jitsi_restrict_room_exec %}
+    muc_restrict_exceptions = { "test" }
+    muc_restrict_executable = "/testrooms.sh"
+{% endif %}
+
 
 -- internal muc component
 

@@ -69,6 +69,12 @@
       name: jitsi-meet-prosody
       state: present
 
+# https://community.jitsi.org/t/restrict-creation-of-rooms/17328/6
+- name: copy mod_muc_restrict_rooms_exec
+  copy:
+    src: mod_muc_restrict_rooms_exec.lua
+    dest: /usr/lib/prosody/modules/
+
 - name: make sure prosody jitsi auto config file is absent
   file:
     path: /etc/prosody/conf.d/ok.cfg.lua

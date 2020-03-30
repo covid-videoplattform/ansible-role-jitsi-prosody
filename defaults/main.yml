@@ -2,3 +2,4 @@
 # defaults file for ansible-role-jitsi-prosody
 jitsi_secure_domain: false
 jitsi_restrict_room_creation: false
+jitsi_restrict_room_exec: false
