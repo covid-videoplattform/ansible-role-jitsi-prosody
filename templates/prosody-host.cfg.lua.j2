@@ -88,6 +88,8 @@ Component "conference.{{ jitsi_domain }}" "muc"
 
     admins = { "focus@auth.{{ jitsi_domain }}" }
 
+    storage = "memory"
+
 -- internal muc component
 
 Component "internal.auth.{{ jitsi_domain }}" "muc"
@@ -99,6 +101,9 @@ Component "internal.auth.{{ jitsi_domain }}" "muc"
     }
 
     admins = { "focus@auth.{{ jitsi_domain }}", "jvb@auth.{{ jitsi_domain }}" }
+
+    storage = "memory"
+    muc_room_cache_size = 1000
 
 VirtualHost "auth.{{ jitsi_domain }}"
 
