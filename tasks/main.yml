@@ -67,6 +67,11 @@
       name: jitsi-meet-prosody
       state: present
 
+- name: make sure prosody jitsi auto config file is absent
+  file:
+    path: /etc/prosody/conf.d/ok.cfg.lua
+    state: absent
+
 - name: enable prosody service
   systemd:
       name: prosody
