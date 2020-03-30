@@ -94,6 +94,10 @@ Component "conference.{{ jitsi_domain }}" "muc"
 
     storage = "memory"
 
+{% if jitsi_restrict_room_creation %}
+    restrict_room_creation = true
+{% endif %}
+
 -- internal muc component
 
 Component "internal.auth.{{ jitsi_domain }}" "muc"
