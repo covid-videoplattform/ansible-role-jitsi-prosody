@@ -67,7 +67,7 @@
 - name: install jitsi-meet-prosody package
   apt:
       name: jitsi-meet-prosody
-      state: present
+      state: latest
 
 # https://community.jitsi.org/t/restrict-creation-of-rooms/17328/6
 - name: copy mod_muc_restrict_rooms_exec
