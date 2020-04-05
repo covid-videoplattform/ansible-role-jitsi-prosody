@@ -5,3 +5,7 @@ prosody_hostname: "{{inventory_hostname}}"
 jitsi_secure_domain: false
 jitsi_restrict_room_creation: false
 jitsi_restrict_room_exec: false
+
+jicofo_secret: "{{ ansible_local['jitsi-prosody'].jicofo_secret }}"
+jicofo_auth_password: "{{ ansible_local['jitsi-prosody'].jicofo_auth_password }}"
+jvb_auth_password: "{{ ansible_local['jitsi-prosody'].jvb_auth_password }}"

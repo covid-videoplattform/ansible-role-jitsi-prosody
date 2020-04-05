@@ -1,6 +1,8 @@
 ---
 # tasks file for ansible-role-jitsi-prosody
 
+- import_tasks: local_facts.yaml
+
 - name: install base packages
   apt:
       pkg:
@@ -90,4 +92,4 @@
   command: prosodyctl register focus "auth.{{jitsi_domain}}" "{{jicofo_auth_password}}"
 
 - name: create jvb user
-  command: prosodyctl register jvb "auth.{{jitsi_domain}}" "{{jvb_secret}}"
+  command: prosodyctl register jvb "auth.{{jitsi_domain}}" "{{jvb_auth_password}}"

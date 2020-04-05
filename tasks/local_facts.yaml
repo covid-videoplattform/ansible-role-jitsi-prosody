@@ -1,0 +1,17 @@
+---
+
+- name: ansible local facts directory
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+
+- name: set ansible local fact
+  copy:
+    content: "{{_local_facts|to_json}}"
+    dest: /etc/ansible/facts.d/{{role_name}}.fact
+    mode: 0600
+  register: _local_facts_set
+
+- name: Gathering Facts
+  setup:
+  when: _local_facts_set.changed
