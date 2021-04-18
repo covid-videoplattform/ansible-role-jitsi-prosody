@@ -1,11 +1,24 @@
 ---
-# defaults file for ansible-role-jitsi-prosody
 prosody_hostname: "{{inventory_hostname}}"
+
+turn_host: "{{ jitsi_domain }}"
+
+jitsi_domain: "{{inventory_hostname}}"
+jitsi_auth_domain: "auth.{{ jitsi_domain }}"
+jitsi_internal_auth_domain: "internal.{{ jitsi_auth_domain }}"
+jitsi_conference_domain: "conference.{{ jitsi_domain }}"
+jitsi_speakerstats_domain: "speakerstats.{{ jitsi_domain }}"
+jitsi_conferenceduration_domain: "conferenceduration.{{ jitsi_domain }}"
+jitsi_focus_domain: "focus.{{ jitsi_domain }}"
+jitsi_recorder_domain: "recorder.{{ jitsi_domain }}"
+jitsi_guest_domain: "guest.{{ jitsi_domain }}"
 
 jitsi_secure_domain: false
 jitsi_restrict_room_creation: false
 jitsi_restrict_room_exec: false
 
-jicofo_secret: "{{ ansible_local['jitsi-prosody'].jicofo_secret }}"
+jicofo_auth_user: focus
 jicofo_auth_password: "{{ ansible_local['jitsi-prosody'].jicofo_auth_password }}"
+
+jvb_auth_user: jvb
 jvb_auth_password: "{{ ansible_local['jitsi-prosody'].jvb_auth_password }}"

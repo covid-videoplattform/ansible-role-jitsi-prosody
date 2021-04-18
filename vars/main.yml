@@ -1,6 +1,5 @@
 ---
 # vars file for ansible-role-jitsi-prosody
 _local_facts:
-  jicofo_secret: "{% if not ansible_local['jitsi-prosody'].jicofo_secret is defined %}{{ lookup('password', '/dev/null length=16 chars=ascii_letters') }}{% else %}{{ ansible_local['jitsi-prosody'].jicofo_secret }}{% endif %}"
   jicofo_auth_password: "{% if not ansible_local['jitsi-prosody'].jicofo_auth_password is defined %}{{ lookup('password', '/dev/null length=16 chars=ascii_letters') }}{% else %}{{ ansible_local['jitsi-prosody'].jicofo_auth_password }}{% endif %}"
   jvb_auth_password: "{% if not ansible_local['jitsi-prosody'].jvb_auth_password is defined %}{{ lookup('password', '/dev/null length=16 chars=ascii_letters') }}{% else %}{{ ansible_local['jitsi-prosody'].jvb_auth_password }}{% endif %}"

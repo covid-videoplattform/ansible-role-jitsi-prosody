@@ -38,6 +38,11 @@
     dest: /etc/prosody/prosody.cfg.lua
   notify: restart prosody service
 
+- name: make sure prosody localhost config is absent
+  file:
+    path: /etc/prosody/conf.d/localhost.cfg.lua
+    state: absent
+
 - name: prosody jitsi host config
   template:
     src: prosody-host.cfg.lua.j2
@@ -52,19 +57,9 @@
 - name: generate auth certificate
   command: prosodyctl cert generate auth.{{jitsi_domain}}
   args:
-    creates: /var/lib/prosody/auth.{{ jitsi_domain }}.crt
+    creates: /var/lib/prosody/{{ jitsi_auth_domain }}.crt
 
-- name: add gpg key for jitsi repo
-  apt_key:
-    url: https://download.jitsi.org/jitsi-key.gpg.key
-    state: present
-    keyring: /etc/apt/trusted.gpg.d/jitsi.gpg
-
-- name: add jitsi-meet stable apt repo
-  apt_repository:
-    repo: deb https://download.jitsi.org stable/
-    state: present
-    filename: jitsi
+- import_tasks: jitsi-repo.yaml
 
 - name: install jitsi-meet-prosody package
   apt:
@@ -88,8 +83,11 @@
       name: prosody
       enabled: yes
 
-- name: create focus user
-  command: prosodyctl register focus "auth.{{jitsi_domain}}" "{{jicofo_auth_password}}"
+- name: create jicofo user
+  command: prosodyctl register {{jicofo_auth_user}} "{{jitsi_auth_domain}}" "{{jicofo_auth_password}}"
 
 - name: create jvb user
-  command: prosodyctl register jvb "auth.{{jitsi_domain}}" "{{jvb_auth_password}}"
+  command: prosodyctl register {{jvb_auth_user}} "{{jitsi_auth_domain}}" "{{jvb_auth_password}}"
+
+- name: register focus roster
+  command: prosodyctl mod_roster_command subscribe {{jitsi_focus_domain}} {{jicofo_auth_user}}@{{jitsi_auth_domain}}

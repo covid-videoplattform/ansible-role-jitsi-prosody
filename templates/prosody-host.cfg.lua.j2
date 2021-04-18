@@ -1,153 +1,88 @@
 plugin_paths = { "/usr/share/jitsi-meet/prosody-plugins/" }
 
 -- domain mapper options, must at least have domain base set to use the mapper
-
 muc_mapper_domain_base = "{{ jitsi_domain }}";
 
 turncredentials_secret = "{{turncredentials_secret}}";
 
 turncredentials = {
-
-  { type = "stun", host = "{{ jitsi_domain }}", port = "443" },
-
-  { type = "turn", host = "{{ jitsi_domain }}", port = "443", transport = "udp" },
-
-  { type = "turns", host = "{{ jitsi_domain }}", port = "443", transport = "tcp" }
-
+    { type = "stun", host = "{{ turn_host }}", port = "443" },
+    { type = "turn", host = "{{ turn_host }}", port = "443", transport = "udp" },
+    { type = "turns", host = "{{ turn_host }}", port = "443", transport = "tcp" }
 };
 
 cross_domain_bosh = false;
-
 consider_bosh_secure = true;
 
 VirtualHost "{{ jitsi_domain }}"
-
-        -- enabled = false -- Remove this line to enable this host
-
-{% if jitsi_secure_domain %}
-        authentication = "internal_plain"
-{% else %}
-        authentication = "anonymous"
-{% endif %}
-
-        -- Properties below are modified by jitsi-meet-tokens package config
-
-        -- and authentication above is switched to "token"
-
-        --app_id="example_app_id"
-
-        --app_secret="example_app_secret"
-
-        -- Assign this host a certificate for TLS, otherwise it would use the one
-
-        -- set in the global section (if any).
-
-        -- Note that old-style SSL on port 5223 only supports one certificate, and will always
-
-        -- use the global one.
-
-        ssl = {
-
-                key = "/var/lib/prosody/{{ jitsi_domain }}.key";
-
-                certificate = "/var/lib/prosody/{{ jitsi_domain }}.crt";
-
-        }
-
-        speakerstats_component = "speakerstats.{{ jitsi_domain }}"
-
-        conference_duration_component = "conferenceduration.{{ jitsi_domain }}"
-
-        -- we need bosh
-
-        modules_enabled = {
-
-            "bosh";
-
-            "pubsub";
-
-            "ping"; -- Enable mod_ping
-
-            "speakerstats";
-
-            "turncredentials";
-
-            "conference_duration";
-
-        }
-
-        c2s_require_encryption = false
-
-Component "conference.{{ jitsi_domain }}" "muc"
-
-    modules_enabled = {
-
-        "muc_meeting_id";
-
-        "muc_domain_mapper";
-
-        -- "token_verification";
-
-{% if jitsi_restrict_room_exec %}
-        "muc_restrict_rooms_exec";
-{% endif %}
+    -- enabled = false -- Remove this line to enable this host
+    authentication = "anonymous"
+    -- Properties below are modified by jitsi-meet-tokens package config
+    -- and authentication above is switched to "token"
+    --app_id="example_app_id"
+    --app_secret="example_app_secret"
+    -- Assign this host a certificate for TLS, otherwise it would use the one
+    -- set in the global section (if any).
+    -- Note that old-style SSL on port 5223 only supports one certificate, and will always
+    -- use the global one.
+    ssl = {
+        key = "/var/lib/prosody/{{ jitsi_domain }}.key";
+        certificate = "/var/lib/prosody/{{ jitsi_domain }}.crt";
     }
+    speakerstats_component = "{{ jitsi_speakerstats_domain }}"
+    conference_duration_component = "{{ jitsi_conferenceduration_domain }}"
+    -- we need bosh
+    modules_enabled = {
+        "bosh";
+        "pubsub";
+        "ping"; -- Enable mod_ping
+        "speakerstats";
+        "turncredentials";
+        "conference_duration";
+    }
+    c2s_require_encryption = false
 
-    admins = { "focus@auth.{{ jitsi_domain }}" }
-
+Component "{{ jitsi_conference_domain }}" "muc"
     storage = "memory"
-
-{% if jitsi_restrict_room_creation %}
-    restrict_room_creation = true
-{% endif %}
-
-{% if jitsi_restrict_room_exec %}
-    muc_restrict_exceptions = { "test" }
-    muc_restrict_executable = "/testrooms.sh"
-{% endif %}
-
+    modules_enabled = {
+        "muc_meeting_id";
+        "muc_domain_mapper";
+        --"token_verification";
+    }
+    admins = { "{{jicofo_auth_user}}@{{ jitsi_auth_domain }}" }
+    muc_room_locking = false
+    muc_room_default_public_jids = true
 
 -- internal muc component
-
-Component "internal.auth.{{ jitsi_domain }}" "muc"
-
-    modules_enabled = {
-
-      "ping";
-
-    }
-
-    admins = { "focus@auth.{{ jitsi_domain }}", "jvb@auth.{{ jitsi_domain }}" }
-
+-- Note: This is also used from jibris
+Component "{{ jitsi_internal_auth_domain }}" "muc"
     storage = "memory"
-    muc_room_cache_size = 1000
-
-{% if jitsi_secure_domain %}
-VirtualHost "guest.{{ jitsi_domain }}"
-    authentication = "anonymous"
-    c2s_require_encryption = false
-{% endif %}
-
-VirtualHost "auth.{{ jitsi_domain }}"
-
-    ssl = {
-
-        key = "/var/lib/prosody/auth.{{ jitsi_domain }}.key";
-
-        certificate = "/var/lib/prosody/auth.{{ jitsi_domain }}.crt";
-
+    modules_enabled = {
+        "ping";
     }
+    admins = { "{{jicofo_auth_user}}@{{ jitsi_auth_domain }}", "{{jvb_auth_user}}@{{ jitsi_auth_domain }}" }
 
+VirtualHost "{{ jitsi_auth_domain }}"
+    ssl = {
+        key = "/var/lib/prosody/{{ jitsi_auth_domain }}.key";
+        certificate = "/var/lib/prosody/{{ jitsi_auth_domain }}.crt";
+    }
+    --authentication = "internal_hashed"
     authentication = "internal_plain"
 
-Component "focus.{{ jitsi_domain }}"
+Component "{{ jitsi_focus_domain }}" "client_proxy"
+    target_address = "{{ jicofo_auth_user }}@{{ jitsi_auth_domain }}"
 
-    component_secret = "{{jicofo_secret}}"
+Component "{{ jitsi_speakerstats_domain }}" "speakerstats_component"
+    muc_component = "{{ jitsi_conference_domain }}"
 
-Component "speakerstats.{{ jitsi_domain }}" "speakerstats_component"
+Component "{{ jitsi_conferenceduration_domain }}" "conference_duration_component"
+    muc_component = "{{ jitsi_conference_domain }}"
 
-    muc_component = "conference.{{jitsi_domain }}"
-
-Component "conferenceduration.{{ jitsi_domain }}" "conference_duration_component"
-
-    muc_component = "conference.{{ jitsi_domain }}"
+-- for Jibri
+VirtualHost "{{ jitsi_recorder_domain }}"
+    modules_enabled = {
+        "ping";
+    }
+    authentication = "internal_hashed"
+    c2s_require_encryption = false
